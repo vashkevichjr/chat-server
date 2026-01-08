@@ -1,3 +1,4 @@
+// Package main starts the gRPC server.
 package main
 
 import (
