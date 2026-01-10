@@ -1,4 +1,11 @@
+-include .env
+
 LOCAL_BIN:=$(CURDIR)/bin
+APP_NAME:=chat-server
+TAG:=v1
+REGISTRY_ID=$(YANDEX_REGISTRY_ID)
+REGISTRY:=cr.yandex/$(REGISTRY_ID)
+IMAGE_NAME:=$(REGISTRY)/$(APP_NAME):$(TAG)
 
 install-golangci-lint:
 	curl -sSfL https://golangci-lint.run/install.sh | sh -s -- -b $(LOCAL_BIN) v2.7.2
@@ -26,3 +33,14 @@ generate-chat-api:
 	--go-grpc_out=pkg/chat_v1 --go-grpc_opt=paths=source_relative \
 	--plugin=protoc-gen-go-grpc=bin/protoc-gen-go-grpc \
 	api/chat_v1/chat.proto
+
+build-and-push:
+	docker buildx build --platform linux/amd64 -t $(IMAGE_NAME) --push .
+
+login:
+	yc container registry configure-docker
+
+help:
+	@echo "Usage:"
+	@echo "  make build-and-push  - Build and push image to Yandex Registry"
+	@echo "  make login           - Configure Docker to use Yandex Registry"
